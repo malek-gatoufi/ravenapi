@@ -380,7 +380,19 @@ class RavenapiCheckoutModuleFrontController extends RavenApiBaseModuleFrontContr
             $customer->secure_key
         );
 
-        return new Order($paymentModule->currentOrder);
+        $order = new Order($paymentModule->currentOrder);
+        
+        // Enregistrer la source du frontend (nextjs ou classic)
+        $frontendSource = $this->getBodyParam('frontend_source', 'classic');
+        if ($frontendSource === 'nextjs') {
+            Db::getInstance()->update(
+                'orders',
+                ['frontend_source' => 'nextjs'],
+                'id_order = ' . (int) $order->id
+            );
+        }
+
+        return $order;
     }
 
     /**
